@@ -2,6 +2,6 @@ fastapi==0.104.0
 uvicorn==0.23.2
 celery==5.3.4
 redis==5.0.1
-litellm==0.9.4
-pydantic==2.4.2
+litellm==1.0.0
+pydantic>=2.7.0
 python-dotenv==1.0.0

@@ -14,40 +14,58 @@ A high-performance, asynchronous backend service for comparing TV advertisement 
 
 ### Prerequisites
 
-- Python 3.10+
+- Python 3.9+
 - Redis (for production deployments with Celery)
 - API key for an LLM provider (OpenAI, Anthropic, Azure OpenAI, etc.)
 
-### Local Development Setup
+### First Time Setup
 
 1. **Clone the repository**
 
-2. **Set up a virtual environment**:
+2. **Set up a virtual environment** (do this once per environment):
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
+   
+   > **Note:** Never commit the `venv/` directory to version control. It's already excluded in the `.gitignore` file.
 
 3. **Install dependencies**:
    ```bash
-   pip install -r requirements.txt
+   python -m pip install -r requirements.txt
    ```
 
 4. **Configure environment variables**:
    - Copy `.env.example` to `.env`
    - Add your LLM API key and other configuration
 
-5. **Run the service**:
-   ```bash
-   # Start the API server
-   uvicorn app.main:app --reload
+### Running the Application
 
-   # For production with Celery workers (in a separate terminal)
-   # 1. Start Redis
+1. **Activate your virtual environment** (if not already activated):
+   ```bash
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+2. **Start the API server** (Simple mode):
+   ```bash
+   python -m uvicorn app.main:app --reload
+   ```
+   
+   If port 8000 is busy, use:
+   ```bash
+   python -m uvicorn app.main:app --reload --port 8001
+   ```
+
+3. **For production with Celery workers** (in separate terminals):
+   ```bash
+   # Terminal 1: Start Redis
    docker run -d -p 6379:6379 --name redis redis:latest
    
-   # 2. Start Celery worker
-   celery -A app.tasks.celery_app worker --loglevel=info
+   # Terminal 2: Start Celery worker
+   python -m celery -A app.tasks.celery_app worker --loglevel=info
+   
+   # Terminal 3: Start API server
+   python -m uvicorn app.main:app --reload
    ```
 
 ### Using Docker Compose
