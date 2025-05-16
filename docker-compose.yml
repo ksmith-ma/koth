@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DEFAULT_LLM_MODEL=${DEFAULT_LLM_MODEL:-gpt-4}
+      # LLM API keys will be passed from host environment
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  worker:
+    build: .
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DEFAULT_LLM_MODEL=${DEFAULT_LLM_MODEL:-gpt-4}
+      # LLM API keys will be passed from host environment
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+    command: celery -A app.tasks.celery_app worker --loglevel=info
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:
